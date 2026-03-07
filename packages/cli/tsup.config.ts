@@ -7,6 +7,5 @@ export default defineConfig({
   clean: true,
   banner: { js: "#!/usr/bin/env node" },
   outExtension: () => ({ js: ".js" }),
-  noExternal: ["@gigai/shared"],
-  external: ["@gigai/server"],
+  noExternal: ["@gigai/shared", "@gigai/server"],
 });
