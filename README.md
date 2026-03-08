@@ -142,7 +142,7 @@ kon edit ~/f.txt "old" "new"          # edit a file
 kon glob "**/*.ts" ~/project          # find files
 kon grep "TODO" ~/project             # search contents
 kon bash git status                   # run a shell command
-kon browser navigate https://example.com  # use an MCP tool
+kon obsidian search-notes "meeting notes"  # use an MCP tool
 ```
 
 ## gigai server management
@@ -159,11 +159,25 @@ gigai uninstall              # remove background service
 
 ## What you can do with it
 
-**Wrap any CLI tool.** Run `gigai wrap cli` and point it at any command — docker, kubectl, ffmpeg, whatever. That command is now accessible from Claude on your phone.
+**Give Claude a browser.** Wrap [agent-browser](https://github.com/vercel-labs/agent-browser) as a CLI tool and Claude can navigate the web from your machine:
 
-**Wrap any MCP server.** Run `gigai wrap mcp` and give it an npx command or binary path. gigai spawns the MCP process and proxies tool calls over REST. Your existing MCP servers now work from anywhere, not just Claude Desktop.
+```bash
+gigai wrap cli
+# name: agent-browser
+# command: npx agent-browser
+```
 
-**Import from Claude Desktop.** Run `gigai wrap import` and point it at your `claude_desktop_config.json`. Everything carries over.
+**Connect your Obsidian vault.** Wrap an Obsidian MCP server and Claude can search and read your notes from anywhere:
+
+```bash
+gigai mcp add obsidian -- npx @mauricio.wolff/mcp-obsidian@latest ~/Documents/MyVault
+```
+
+**Wrap any CLI tool.** Point it at any command — docker, kubectl, ffmpeg, whatever. That command is now accessible from Claude on your phone.
+
+**Wrap any MCP server.** gigai spawns the MCP process and proxies tool calls over REST. Your existing MCP servers now work from anywhere, not just Claude Desktop.
+
+**Import from Claude Desktop.** The setup wizard auto-detects your `claude_desktop_config.json` and offers to import everything.
 
 **Wrap scripts.** Any executable — bash, python, whatever — can become a tool with `gigai wrap script`.
 
@@ -212,9 +226,10 @@ Tools are defined in `gigai.config.json`. The setup wizard and `gigai wrap` comm
 ```json
 {
   "type": "cli",
-  "name": "docker",
-  "command": "docker",
-  "description": "Docker container management",
+  "name": "agent-browser",
+  "command": "npx",
+  "args": ["agent-browser"],
+  "description": "Headless browser automation for AI agents",
   "timeout": 60000
 }
 ```
@@ -226,10 +241,10 @@ Tools are defined in `gigai.config.json`. The setup wizard and `gigai wrap` comm
 ```json
 {
   "type": "mcp",
-  "name": "browser",
+  "name": "obsidian",
   "command": "npx",
-  "args": ["-y", "@anthropic-ai/mcp-server-puppeteer"],
-  "description": "Browser automation"
+  "args": ["@mauricio.wolff/mcp-obsidian@latest", "~/Documents/MyVault"],
+  "description": "Search and read Obsidian notes"
 }
 ```
 </details>
