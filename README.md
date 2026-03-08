@@ -29,6 +29,8 @@ Before you start, you need two things:
 
 Kon requires an HTTPS connection between Claude's sandbox and your machine. [Tailscale](https://tailscale.com/) with Funnel enabled is the recommended (and easiest) way to get this. Install Tailscale, create an account, and enable Funnel on your machine. The setup wizard handles the rest.
 
+Platform-specific setup guides: [macOS](docs/setup-macos.md) | [Linux](docs/setup-linux.md) | [WSL](docs/setup-wsl.md) | [Docker](docs/setup-docker.md)
+
 **2. Claude capabilities**
 
 On claude.ai, go to **Settings > Capabilities** and configure the **Code execution and file creation** section:
