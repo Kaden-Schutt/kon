@@ -19,7 +19,6 @@ Kon is a lightweight client that runs inside Claude's code execution sandbox. It
 
 Install the server, paste one command into Claude, and anything you've allowed is now accessible from Claude on iOS, the web, or anywhere else you use claude.ai.
 
-No Claude Code subscription. No terminal running on your machine. No developer setup. Just Claude, talking to your computer, doing what you told it it could do.
 
 ## Quickstart with Claude Code
 
