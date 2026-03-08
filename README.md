@@ -21,6 +21,17 @@ Install the server, paste one command into Claude, and anything you've allowed i
 
 No Claude Code subscription. No terminal running on your machine. No developer setup. Just Claude, talking to your computer, doing what you told it it could do.
 
+## Quickstart with Claude Code
+
+If you have [Claude Code](https://docs.anthropic.com/en/docs/claude-code), it can handle the entire setup for you — installing dependencies, configuring Tailscale, picking tools, and starting the server.
+
+```
+/plugin install https://github.com/Kaden-Schutt/kon
+/kon:gigai-setup
+```
+
+Claude Code will walk you through everything below (and help you manage your server after).
+
 ## Prerequisites
 
 Before you start, you need two things:
@@ -77,16 +88,6 @@ In any new conversation, the skill handles setup automatically. Then just ask Cl
 > "Search for TODO comments in ~/projects/myapp"
 
 Claude runs `kon read ...`, `kon bash git ...`, etc. behind the scenes.
-
-## Need help after setup?
-
-If you use [Claude Code](https://docs.anthropic.com/en/docs/claude-code), there's a plugin that can help you manage your gigai server — adding tools, configuring MCP servers, setting up cron jobs, troubleshooting connectivity, and more.
-
-```
-/plugin install https://github.com/Kaden-Schutt/kon
-```
-
-Then run `/kon:gigai-setup` in any conversation and Claude Code will walk you through it.
 
 ## How it works
 
