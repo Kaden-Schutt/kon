@@ -17,6 +17,10 @@
 
 Kon is a lightweight client that runs inside Claude's code execution sandbox. It connects over HTTPS to **gigai**, a server running on your machine that exposes tools — shell commands, filesystem access, MCP servers, scripts — through an authenticated API.
 
+<p align="center">
+  <img src="assets/kon-demo.png" alt="Kon pairing demo" width="680" />
+</p>
+
 Install the server, paste one command into Claude, and anything you've allowed is now accessible from Claude on iOS, the web, or anywhere else you use claude.ai.
 
 ## Quickstart with Claude Code
