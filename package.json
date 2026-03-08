@@ -7,9 +7,7 @@
   ],
   "scripts": {
     "build": "turbo build",
-    "dev": "turbo dev",
-    "test": "turbo test",
-    "clean": "turbo clean"
+    "test": "turbo test"
   },
   "devDependencies": {
     "@types/node": "^20.11.0",
