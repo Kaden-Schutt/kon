@@ -88,10 +88,6 @@ In any new conversation, the skill handles setup automatically. Then just ask Cl
 
 Claude runs `kon read ...`, `kon bash git ...`, etc. behind the scenes.
 
-<p align="left">
-  <img src="assets/kon-icon.png" alt="Kon" width="200" />
-</p>
-
 ## How it works
 
 ```
@@ -300,3 +296,7 @@ Mount your config at `/data/gigai.config.json`.
 ## License
 
 MIT
+
+<p align="left">
+  <img src="assets/kon-icon.png" alt="Kon" width="200" />
+</p>
