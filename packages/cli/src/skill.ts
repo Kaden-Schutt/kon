@@ -98,12 +98,40 @@ For MCP tools, the first arg is the MCP tool name:
 kon <mcp-tool> <mcp-action> [json-args]
 \`\`\`
 
+## Scheduling tasks
+
+Schedule any tool execution on the server:
+\`\`\`bash
+kon cron add "0 9 * * *" bash git pull              # daily at 9am
+kon cron add --at "9:00 AM tomorrow" bash git pull   # one-shot
+kon cron add --at "in 30 minutes" read ~/log.txt     # relative time
+kon cron list                                        # list scheduled jobs
+kon cron remove <id>                                 # remove a job
+\`\`\`
+
 ## Multiple servers
 
+The user may have multiple servers configured (e.g. a Mac and a Linux machine). Use \`kon status\` to see all servers and which is active.
+
 \`\`\`bash
-kon connect <server-name>
-kon status
+kon status                    # show all servers + active
+kon connect <server-name>     # switch to a different server
+kon list                      # list tools on the current server
 \`\`\`
+
+**Routing between servers:** When a tool is not available on the current server, or when a task requires a specific platform (e.g. iMessage requires macOS), switch to the appropriate server:
+
+1. Run \`kon status\` to see available servers
+2. Run \`kon connect <server-name>\` to switch
+3. Run \`kon list\` to verify the tool is available
+4. Execute the command
+
+Platform-specific capabilities:
+- **iMessage**: only available on macOS servers
+- **macOS apps** (Shortcuts, AppleScript): only on macOS servers
+- **systemd, apt, etc.**: only on Linux servers
+
+The \`kon list\` response includes the server's platform. Use this to determine which server to route a request to.
 
 ## Important
 
@@ -111,6 +139,7 @@ kon status
 - All commands execute on the **user's machine**, not in this sandbox
 - If you get auth errors, run \`kon connect\` to refresh the session
 - Tools are scoped to what the user has configured — if a tool is missing, tell the user
+- If you have multiple servers, check which server has the tool you need before executing
 `;
 
 export async function hasExistingSkill(): Promise<boolean> {

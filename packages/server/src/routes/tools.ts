@@ -1,8 +1,9 @@
 import type { FastifyInstance } from "fastify";
+import { platform } from "node:os";
 
 export async function toolRoutes(server: FastifyInstance) {
   server.get("/tools", async () => {
-    return { tools: server.registry.list() };
+    return { tools: server.registry.list(), platform: platform() };
   });
 
   server.get<{ Querystring: { q?: string } }>("/tools/search", async (request) => {

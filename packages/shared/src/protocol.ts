@@ -97,6 +97,8 @@ export interface HealthResponse {
   status: "ok";
   version: string;
   uptime: number;
+  platform?: string;
+  hostname?: string;
 }
 
 // Errors

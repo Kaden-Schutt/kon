@@ -1,6 +1,6 @@
 {
   "name": "@schuttdev/kon",
-  "version": "0.2.9",
+  "version": "0.3.0",
   "type": "module",
   "description": "Lightweight gigai client for Claude code execution",
   "bin": {

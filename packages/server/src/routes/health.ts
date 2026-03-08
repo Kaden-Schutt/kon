@@ -1,6 +1,7 @@
 import type { FastifyInstance } from "fastify";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { platform, hostname } from "node:os";
 
 const startTime = Date.now();
 
@@ -23,6 +24,8 @@ export async function healthRoutes(server: FastifyInstance) {
       status: "ok" as const,
       version: startupVersion,
       uptime: Date.now() - startTime,
+      platform: platform(),
+      hostname: hostname(),
     };
   });
 }

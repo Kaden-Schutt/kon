@@ -54,7 +54,8 @@ export function formatStatus(config: ClientConfig): string {
   for (const name of serverNames) {
     const entry = config.servers[name];
     const active = name === config.activeServer ? " (active)" : "";
-    lines.push(`  ${name}${active}  ${entry.server}`);
+    const platformTag = entry.platform ? ` [${entry.platform}]` : "";
+    lines.push(`  ${name}${active}${platformTag}  ${entry.server}`);
     if (entry.sessionExpiresAt) {
       const remaining = entry.sessionExpiresAt - Date.now();
       if (remaining > 0) {

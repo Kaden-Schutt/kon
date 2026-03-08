@@ -59,6 +59,19 @@ async function checkAndUpdateServer(serverUrl: string, sessionToken: string): Pr
     const http = createHttpClient(serverUrl);
     const health = await http.get<HealthResponse>("/health");
 
+    // Cache platform info
+    if (health.platform || health.hostname) {
+      const config = await readConfig();
+      for (const entry of Object.values(config.servers)) {
+        if (normalizeUrl(entry.server) === normalizeUrl(serverUrl)) {
+          entry.platform = health.platform;
+          entry.hostname = health.hostname;
+          break;
+        }
+      }
+      await writeConfig(config);
+    }
+
     if (isNewer(VERSION, health.version)) {
       console.log(`Server is outdated (${health.version} → ${VERSION}). Updating...`);
 
@@ -93,6 +106,14 @@ async function waitForServer(serverUrl: string, timeoutMs: number): Promise<void
     } catch {
       await new Promise((r) => setTimeout(r, 1000));
     }
+  }
+}
+
+function normalizeUrl(url: string): string {
+  try {
+    return new URL(url).hostname.toLowerCase();
+  } catch {
+    return url.toLowerCase();
   }
 }
 

@@ -7,6 +7,8 @@ export interface ServerEntry {
   token: string;
   sessionToken?: string;
   sessionExpiresAt?: number;
+  platform?: string;
+  hostname?: string;
 }
 
 export interface ClientConfig {
