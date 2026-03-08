@@ -37,21 +37,32 @@ export async function connect(serverName?: string): Promise<{ serverUrl: string;
     }
   }
 
-  // Exchange token for session
+  return refreshSession(name, entry.server, entry.token);
+}
+
+/**
+ * Exchange the stored encrypted token for a fresh session.
+ * Called on initial connect and on 401 retry.
+ */
+export async function refreshSession(
+  serverName: string,
+  serverUrl: string,
+  encryptedToken: string,
+): Promise<{ serverUrl: string; sessionToken: string }> {
   const orgUuid = getOrgUUID();
-  const http = createHttpClient(entry.server);
+  const http = createHttpClient(serverUrl);
 
   const res = await http.post<ConnectResponse>("/auth/connect", {
-    encryptedToken: entry.token,
+    encryptedToken,
     orgUuid,
   });
 
-  await updateServerSession(name, res.sessionToken, res.expiresAt);
+  await updateServerSession(serverName, res.sessionToken, res.expiresAt);
 
   // Check server version after connecting
-  await checkAndUpdateServer(entry.server, res.sessionToken);
+  await checkAndUpdateServer(serverUrl, res.sessionToken);
 
-  return { serverUrl: entry.server, sessionToken: res.sessionToken };
+  return { serverUrl, sessionToken: res.sessionToken };
 }
 
 async function checkAndUpdateServer(serverUrl: string, sessionToken: string): Promise<void> {

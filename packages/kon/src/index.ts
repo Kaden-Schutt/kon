@@ -1,6 +1,6 @@
 import { defineCommand, runMain } from "citty";
-import { readConfig } from "../../cli/src/config.js";
-import { connect } from "../../cli/src/connect.js";
+import { readConfig, getActiveEntry } from "../../cli/src/config.js";
+import { connect, refreshSession } from "../../cli/src/connect.js";
 import { pair } from "../../cli/src/pair.js";
 import { createHttpClient } from "../../cli/src/http.js";
 import { fetchTools, fetchToolDetail } from "../../cli/src/discover.js";
@@ -23,23 +23,46 @@ if (firstArg && !firstArg.startsWith("-") && !KNOWN_COMMANDS.has(firstArg)) {
   const toolArgs = process.argv.slice(3);
 
   try {
-    const { serverUrl, sessionToken } = await connect();
-    const http = createHttpClient(serverUrl, sessionToken);
+    let { serverUrl, sessionToken } = await connect();
+    let http = createHttpClient(serverUrl, sessionToken);
 
-    const { tool: detail } = await fetchToolDetail(http, toolName);
+    const runTool = async () => {
+      const { tool: detail } = await fetchToolDetail(http, toolName);
 
-    if (detail.type === "mcp") {
-      const mcpToolName = toolArgs[0];
-      if (!mcpToolName) {
-        const toolNames = (detail.mcpTools ?? []).map(t => `  ${t.name} — ${t.description}`);
-        console.log(`MCP tools for ${toolName}:\n${toolNames.join("\n")}`);
+      if (detail.type === "mcp") {
+        const mcpToolName = toolArgs[0];
+        if (!mcpToolName) {
+          const toolNames = (detail.mcpTools ?? []).map(t => `  ${t.name} — ${t.description}`);
+          console.log(`MCP tools for ${toolName}:\n${toolNames.join("\n")}`);
+        } else {
+          const jsonArg = toolArgs.slice(1).join(" ");
+          const args = jsonArg ? JSON.parse(jsonArg) : {};
+          await execMcpTool(http, toolName, mcpToolName, args);
+        }
       } else {
-        const jsonArg = toolArgs.slice(1).join(" ");
-        const args = jsonArg ? JSON.parse(jsonArg) : {};
-        await execMcpTool(http, toolName, mcpToolName, args);
+        await execTool(http, toolName, toolArgs);
       }
-    } else {
-      await execTool(http, toolName, toolArgs);
+    };
+
+    try {
+      await runTool();
+    } catch (e) {
+      const msg = (e as Error).message;
+      if (msg.includes("Invalid session") || msg.includes("Session expired") || msg.includes("Authorization")) {
+        // Session was stale (e.g. server restarted) — refresh and retry once
+        const config = await readConfig();
+        const active = getActiveEntry(config);
+        if (active) {
+          const refreshed = await refreshSession(active.name, active.entry.server, active.entry.token);
+          sessionToken = refreshed.sessionToken;
+          http = createHttpClient(serverUrl, sessionToken);
+          await runTool();
+        } else {
+          throw e;
+        }
+      } else {
+        throw e;
+      }
     }
   } catch (e) {
     console.error(`Error: ${(e as Error).message}`);

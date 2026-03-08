@@ -43,7 +43,7 @@ export async function execCommandSafe(
   }
 
   return new Promise((resolve, reject) => {
-    const child = spawn(command, args, {
+    const child = spawn(command, ["--", ...args], {
       shell: false,
       stdio: ["ignore", "pipe", "pipe"],
     });

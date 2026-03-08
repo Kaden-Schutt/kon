@@ -30,7 +30,7 @@ export function executeTool(
   switch (entry.type) {
     case "cli":
       command = entry.config.command;
-      spawnArgs = [...(entry.config.args ?? []), ...sanitized];
+      spawnArgs = [...(entry.config.args ?? []), "--", ...sanitized];
       cwd = entry.config.cwd;
       env = entry.config.env;
       break;

@@ -25,8 +25,7 @@ export async function validatePath(targetPath: string, allowedPaths: string[]): 
   const isAllowed = allowedPaths.some((allowed) => {
     const resolvedAllowed = resolve(allowed);
     const allowedPrefix = resolvedAllowed.endsWith("/") ? resolvedAllowed : resolvedAllowed + "/";
-    return real === resolvedAllowed || real.startsWith(allowedPrefix)
-      || resolved === resolvedAllowed || resolved.startsWith(allowedPrefix);
+    return real === resolvedAllowed || real.startsWith(allowedPrefix);
   });
 
   if (!isAllowed) {
@@ -36,7 +35,7 @@ export async function validatePath(targetPath: string, allowedPaths: string[]): 
     );
   }
 
-  return resolved;
+  return real;
 }
 
 // --- Legacy filesystem builtin (read/list/search subcommands) ---
