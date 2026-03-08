@@ -299,10 +299,10 @@ export async function runInit(): Promise<void> {
 
   console.log(`\n  Paste this into Claude to pair:\n`);
   console.log(`  ──────────────────────────────────────────────`);
-  console.log(`  Install the gigai CLI and pair with my server:\n`);
+  console.log(`  Install kon and pair with my server:\n`);
   console.log(`  \`\`\`bash`);
-  console.log(`  npm install -g @schuttdev/gigai`);
-  console.log(`  gigai pair ${code} ${serverUrl}`);
+  console.log(`  npm install -g @schuttdev/kon`);
+  console.log(`  kon pair ${code} ${serverUrl}`);
   console.log(`  \`\`\`\n`);
   console.log(`  Then show me the skill file output so I can save it.`);
   console.log(`  ──────────────────────────────────────────────`);

@@ -4,64 +4,64 @@ import type { ClientConfig, ServerEntry } from "./config.js";
 
 const SKILL_MD = `---
 name: gigai
-description: Access tools on the user's machine via the gigai CLI
+description: Access tools on the user's machine via kon (gigai client)
 ---
 
 # gigai
 
-You have access to tools running on the user's local machine through the gigai CLI. This CLI proxies commands over HTTPS to a server on the user's machine.
+You have access to tools running on the user's local machine through kon, the gigai client CLI. It proxies commands over HTTPS to a server on the user's machine.
 
 ## Setup (run once per conversation)
 
 \`\`\`bash
-npm install -g @schuttdev/gigai 2>/dev/null
+npm install -g @schuttdev/kon 2>/dev/null
 mkdir -p ~/.gigai
 cp /mnt/skills/user/gigai/config.json ~/.gigai/config.json
-gigai connect
+kon connect
 \`\`\`
 
-If \`gigai connect\` succeeds, you are ready to use tools. If it fails, tell the user.
+If \`kon connect\` succeeds, you are ready to use tools. If it fails, tell the user.
 
 ## Usage
 
 ### List available tools
 \`\`\`bash
-gigai list
+kon list
 \`\`\`
 
 ### Run a tool
 \`\`\`bash
-gigai <tool-name> [args...]
+kon <tool-name> [args...]
 \`\`\`
 
 Examples:
 \`\`\`bash
-gigai shell date
-gigai fs list Documents
-gigai shell whoami
+kon shell date
+kon fs list Documents
+kon shell whoami
 \`\`\`
 
 ### Get help for a tool
 \`\`\`bash
-gigai help <tool-name>
+kon help <tool-name>
 \`\`\`
 
 ### Switch server (if multiple are configured)
 \`\`\`bash
-gigai connect <server-name>
+kon connect <server-name>
 \`\`\`
 
 ### File transfer
 \`\`\`bash
-gigai upload <file>
-gigai download <id> <dest>
+kon upload <file>
+kon download <id> <dest>
 \`\`\`
 
 ## Important
 
 - Always run the setup block before first use in a new conversation
 - All commands execute on the **user's machine**, not in this sandbox
-- If you get auth errors, run \`gigai connect\` to refresh the session
+- If you get auth errors, run \`kon connect\` to refresh the session
 - Tools are scoped to what the user has configured — if a tool is missing, tell the user
 `;
 

@@ -11,3 +11,4 @@ coverage/
 tmp/
 gigai.config.json
 gigai-skill/
+*.zip

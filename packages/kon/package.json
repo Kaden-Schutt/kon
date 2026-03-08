@@ -1,0 +1,29 @@
+{
+  "name": "@schuttdev/kon",
+  "version": "0.2.7",
+  "type": "module",
+  "description": "Lightweight gigai client for Claude code execution",
+  "bin": {
+    "kon": "dist/index.js"
+  },
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "citty": "^0.1.6",
+    "zod": "^3.22.0",
+    "undici": "^6.0.0"
+  },
+  "devDependencies": {
+    "@gigai/shared": "*",
+    "tsup": "^8.0.1",
+    "typescript": "^5.3.3"
+  }
+}

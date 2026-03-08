@@ -7,6 +7,7 @@ COPY package.json package-lock.json turbo.json tsconfig.base.json ./
 COPY packages/shared/package.json packages/shared/
 COPY packages/server/package.json packages/server/
 COPY packages/cli/package.json packages/cli/
+COPY packages/kon/package.json packages/kon/
 
 RUN npm ci
 
@@ -44,5 +45,5 @@ EXPOSE 7443
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
   CMD node -e "fetch('http://localhost:7443/health').then(r => r.ok ? process.exit(0) : process.exit(1)).catch(() => process.exit(1))"
 
-ENTRYPOINT ["node", "packages/cli/dist/index.mjs"]
+ENTRYPOINT ["node", "packages/cli/dist/index.js"]
 CMD ["server", "start", "--config", "/data/gigai.config.json"]
