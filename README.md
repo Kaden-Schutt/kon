@@ -29,7 +29,7 @@ If you have [Claude Code](https://docs.anthropic.com/en/docs/claude-code), it ca
 /kon:gigai-setup
 ```
 
-Claude Code will walk you through everything below (and help you manage your server after).
+Claude Code will walk you through everything below (and help you manage your server after). With [Claude Code remote control](https://docs.anthropic.com/en/docs/claude-code/remote-control), you can also add tools, change configs, and troubleshoot from your phone — just tell Claude Code what you want and it runs the commands on your machine.
 
 ## Prerequisites
 
