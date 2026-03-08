@@ -1,7 +1,11 @@
 import type { FastifyInstance } from "fastify";
 import type { ExecRequest, ExecMcpRequest } from "@gigai/shared";
 import { GigaiError, ErrorCode } from "@gigai/shared";
-import { readFileSafe, listDirSafe, searchFilesSafe } from "../builtins/filesystem.js";
+import {
+  readFileSafe, listDirSafe, searchFilesSafe,
+  readBuiltin, writeBuiltin, editBuiltin,
+  globBuiltin, grepBuiltin,
+} from "../builtins/filesystem.js";
 import { execCommandSafe } from "../builtins/shell.js";
 
 export async function execRoutes(server: FastifyInstance) {
@@ -76,6 +80,7 @@ async function handleBuiltin(
   const builtinConfig = config.config ?? {};
 
   switch (config.builtin) {
+    // Legacy combined filesystem tool
     case "filesystem": {
       const allowedPaths = (builtinConfig.allowedPaths as string[]) ?? ["."];
       const subcommand = args[0];
@@ -93,7 +98,46 @@ async function handleBuiltin(
       }
     }
 
+    // Legacy shell tool
     case "shell": {
+      const allowlist = (builtinConfig.allowlist as string[]) ?? [];
+      const allowSudo = (builtinConfig.allowSudo as boolean) ?? false;
+      const command = args[0];
+      if (!command) {
+        throw new GigaiError(ErrorCode.VALIDATION_ERROR, "No command specified");
+      }
+      const result = await execCommandSafe(command, args.slice(1), { allowlist, allowSudo });
+      return { ...result, durationMs: 0 };
+    }
+
+    // --- New builtins ---
+
+    case "read": {
+      const allowedPaths = (builtinConfig.allowedPaths as string[]) ?? ["."];
+      return { ...await readBuiltin(args, allowedPaths), durationMs: 0 };
+    }
+
+    case "write": {
+      const allowedPaths = (builtinConfig.allowedPaths as string[]) ?? ["."];
+      return { ...await writeBuiltin(args, allowedPaths), durationMs: 0 };
+    }
+
+    case "edit": {
+      const allowedPaths = (builtinConfig.allowedPaths as string[]) ?? ["."];
+      return { ...await editBuiltin(args, allowedPaths), durationMs: 0 };
+    }
+
+    case "glob": {
+      const allowedPaths = (builtinConfig.allowedPaths as string[]) ?? ["."];
+      return { ...await globBuiltin(args, allowedPaths), durationMs: 0 };
+    }
+
+    case "grep": {
+      const allowedPaths = (builtinConfig.allowedPaths as string[]) ?? ["."];
+      return { ...await grepBuiltin(args, allowedPaths), durationMs: 0 };
+    }
+
+    case "bash": {
       const allowlist = (builtinConfig.allowlist as string[]) ?? [];
       const allowSudo = (builtinConfig.allowSudo as boolean) ?? false;
       const command = args[0];

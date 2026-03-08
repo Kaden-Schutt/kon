@@ -122,38 +122,69 @@ kon download <id> <dest>     # download a file from the server
 Any unrecognized subcommand is treated as a tool name:
 
 ```bash
-kon shell ls -la
-kon fs read ~/notes.txt
-kon browser navigate https://example.com
+kon read ~/notes.txt                  # read a file
+kon edit ~/f.txt "old" "new"          # edit a file
+kon glob "**/*.ts" ~/project          # find files
+kon grep "TODO" ~/project             # search contents
+kon bash git status                   # run a shell command
+kon browser navigate https://example.com  # use an MCP tool
 ```
 
 ## Tool configuration
 
 Tools are defined in `gigai.config.json`. The setup wizard and `gigai wrap` commands manage this file for you, but here's what each type looks like:
 
-### Built-in: filesystem
+### Built-in tools
+
+gigai ships with builtin tools that mirror standard coding agent capabilities. Each is scoped to configured directories/commands.
+
+| Builtin | Description | Example |
+|---------|-------------|---------|
+| `read` | Read file contents (with optional offset/limit) | `kon read ~/notes.txt 0 50` |
+| `write` | Write content to a file (creates parent dirs) | `kon write ~/out.txt "hello"` |
+| `edit` | Replace text in a file (unique match required) | `kon edit ~/f.txt "old" "new"` |
+| `glob` | Find files by glob pattern | `kon glob "**/*.ts" ~/project` |
+| `grep` | Search file contents (uses ripgrep if available) | `kon grep "TODO" ~/project --glob "*.ts"` |
+| `bash` | Execute shell commands from an allowlist | `kon bash git status` |
+
+Legacy builtins `filesystem` and `shell` are still supported.
 
 ```json
-{
-  "type": "builtin",
-  "name": "fs",
-  "builtin": "filesystem",
-  "config": { "allowedPaths": ["/home/user/projects"] }
-}
-```
-
-### Built-in: shell
-
-```json
-{
-  "type": "builtin",
-  "name": "shell",
-  "builtin": "shell",
-  "config": {
-    "allowlist": ["ls", "cat", "grep", "git", "npm", "node"],
-    "allowSudo": false
+[
+  {
+    "type": "builtin", "name": "read", "builtin": "read",
+    "description": "Read file contents",
+    "config": { "allowedPaths": ["/home/user/projects"] }
+  },
+  {
+    "type": "builtin", "name": "write", "builtin": "write",
+    "description": "Write content to a file",
+    "config": { "allowedPaths": ["/home/user/projects"] }
+  },
+  {
+    "type": "builtin", "name": "edit", "builtin": "edit",
+    "description": "Edit files by replacing text",
+    "config": { "allowedPaths": ["/home/user/projects"] }
+  },
+  {
+    "type": "builtin", "name": "glob", "builtin": "glob",
+    "description": "Find files by pattern",
+    "config": { "allowedPaths": ["/home/user/projects"] }
+  },
+  {
+    "type": "builtin", "name": "grep", "builtin": "grep",
+    "description": "Search file contents",
+    "config": { "allowedPaths": ["/home/user/projects"] }
+  },
+  {
+    "type": "builtin", "name": "bash", "builtin": "bash",
+    "description": "Execute shell commands",
+    "config": {
+      "allowlist": ["ls", "cat", "git", "npm", "node"],
+      "allowSudo": false
+    }
   }
-}
+]
 ```
 
 ### CLI tool

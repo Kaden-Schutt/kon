@@ -22,39 +22,86 @@ kon connect
 
 If \`kon connect\` succeeds, you are ready to use tools. If it fails, tell the user.
 
-## Usage
+## Discovering tools
 
-### List available tools
+List all available tools:
 \`\`\`bash
 kon list
 \`\`\`
 
-### Run a tool
-\`\`\`bash
-kon <tool-name> [args...]
-\`\`\`
-
-Examples:
-\`\`\`bash
-kon shell date
-kon fs list Documents
-kon shell whoami
-\`\`\`
-
-### Get help for a tool
+Get detailed help for a specific tool:
 \`\`\`bash
 kon help <tool-name>
 \`\`\`
 
-### Switch server (if multiple are configured)
+## Core tools
+
+These tools may be available depending on the server's configuration. Run \`kon list\` to see what's enabled.
+
+### read — Read file contents
 \`\`\`bash
-kon connect <server-name>
+kon read <file> [offset] [limit]
 \`\`\`
+- \`offset\`: start from this line number (0-based)
+- \`limit\`: max number of lines to return
+
+### write — Write content to a file
+\`\`\`bash
+kon write <file> <content>
+\`\`\`
+
+### edit — Replace text in a file
+\`\`\`bash
+kon edit <file> <old_string> <new_string> [--all]
+\`\`\`
+- Without \`--all\`: fails if old_string matches multiple locations (provide more context)
+- With \`--all\`: replaces every occurrence
+
+### glob — Find files by pattern
+\`\`\`bash
+kon glob <pattern> [path]
+\`\`\`
+- Supports \`*\`, \`**\`, \`?\`, \`{a,b}\` syntax
+- Example: \`kon glob "**/*.ts" ~/projects/myapp\`
+
+### grep — Search file contents
+\`\`\`bash
+kon grep <pattern> [path] [--glob <filter>] [-i] [-n] [-C <num>]
+\`\`\`
+- Uses ripgrep if available, falls back to built-in search
+- Example: \`kon grep "TODO" ~/projects --glob "*.ts"\`
+
+### bash — Execute shell commands
+\`\`\`bash
+kon bash <command> [args...]
+\`\`\`
+- Commands are restricted to the server's allowlist
+- Example: \`kon bash git status\`
 
 ### File transfer
 \`\`\`bash
 kon upload <file>
 kon download <id> <dest>
+\`\`\`
+
+## Other tools
+
+The server may have additional tools registered (CLI commands, MCP servers, scripts). Any unknown subcommand is treated as a tool name:
+
+\`\`\`bash
+kon <tool-name> [args...]
+\`\`\`
+
+For MCP tools, the first arg is the MCP tool name:
+\`\`\`bash
+kon <mcp-tool> <mcp-action> [json-args]
+\`\`\`
+
+## Multiple servers
+
+\`\`\`bash
+kon connect <server-name>
+kon status
 \`\`\`
 
 ## Important
