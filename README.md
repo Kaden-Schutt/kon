@@ -19,6 +19,17 @@ Kon is a lightweight client that runs inside Claude's code execution sandbox. It
 
 Install the server, paste one command into Claude, and anything you've allowed is now accessible from Claude on iOS, the web, or anywhere else you use claude.ai.
 
+## Quickstart with Claude Code
+
+If you have [Claude Code](https://docs.anthropic.com/en/docs/claude-code), it can handle the entire setup for you:
+
+```
+/plugin install https://github.com/Kaden-Schutt/kon
+/kon:gigai-setup
+```
+
+Claude Code will walk you through everything below (and help you manage your server after). With [Claude Code remote control](https://docs.anthropic.com/en/docs/claude-code/remote-control), you can also add tools, change configs, and troubleshoot from your phone.
+
 ## What you can do with it
 
 **Give Claude a browser.** Wrap [agent-browser](https://github.com/vercel-labs/agent-browser) as a CLI tool and Claude can navigate the web from your machine:
@@ -52,17 +63,6 @@ You decide exactly what Claude can touch. Nothing is open unless you open it.
 - **HTTPS only**: all traffic encrypted via Tailscale Funnel or Cloudflare Tunnel.
 - **AES-256-GCM tokens**: tied to your Anthropic org UUID.
 - **No shell injection**: all execution uses `spawn()` with `shell: false`.
-
-## Quickstart with Claude Code
-
-If you have [Claude Code](https://docs.anthropic.com/en/docs/claude-code), it can handle the entire setup for you:
-
-```
-/plugin install https://github.com/Kaden-Schutt/kon
-/kon:gigai-setup
-```
-
-Claude Code will walk you through everything below (and help you manage your server after). With [Claude Code remote control](https://docs.anthropic.com/en/docs/claude-code/remote-control), you can also add tools, change configs, and troubleshoot from your phone.
 
 ## Quickstart
 
