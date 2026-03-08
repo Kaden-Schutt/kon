@@ -1,8 +1,9 @@
 import { input, select, checkbox, confirm } from "@inquirer/prompts";
-import { writeFile } from "node:fs/promises";
-import { resolve } from "node:path";
+import { readFile, writeFile, readdir } from "node:fs/promises";
+import { resolve, join } from "node:path";
 import { execFile, spawn } from "node:child_process";
 import { promisify } from "node:util";
+import { homedir, platform } from "node:os";
 import { generateEncryptionKey } from "@gigai/shared";
 import type { GigaiConfig, ToolConfig } from "@gigai/shared";
 
@@ -66,6 +67,85 @@ async function ensureTailscaleFunnel(port: number): Promise<string> {
 
   console.log(`  Tailscale Funnel active: https://${dnsName}`);
   return `https://${dnsName}`;
+}
+
+interface McpServerEntry {
+  command: string;
+  args?: string[];
+  env?: Record<string, string>;
+}
+
+async function detectClaudeDesktopConfig(): Promise<string | null> {
+  try {
+    const os = platform();
+
+    if (os === "darwin") {
+      const configPath = join(
+        homedir(),
+        "Library",
+        "Application Support",
+        "Claude",
+        "claude_desktop_config.json",
+      );
+      const contents = await readFile(configPath, "utf-8");
+      if (contents) return configPath;
+    }
+
+    if (os === "linux") {
+      // Check if running under WSL
+      try {
+        const procVersion = await readFile("/proc/version", "utf-8");
+        const isWsl = /microsoft|wsl/i.test(procVersion);
+        if (!isWsl) return null; // Native Linux — no Claude Desktop
+      } catch {
+        return null;
+      }
+
+      // WSL: scan for Windows user directories
+      try {
+        const usersDir = "/mnt/c/Users";
+        const entries = await readdir(usersDir, { withFileTypes: true });
+        for (const entry of entries) {
+          if (!entry.isDirectory()) continue;
+          if (entry.name === "Public" || entry.name === "Default" || entry.name === "Default User") continue;
+          const configPath = join(
+            usersDir,
+            entry.name,
+            "AppData",
+            "Roaming",
+            "Claude",
+            "claude_desktop_config.json",
+          );
+          try {
+            const contents = await readFile(configPath, "utf-8");
+            if (contents) return configPath;
+          } catch {
+            // This user directory doesn't have the config, try next
+          }
+        }
+      } catch {
+        // Can't read /mnt/c/Users — skip
+      }
+    }
+
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+async function scanMcpServers(
+  configPath: string,
+): Promise<Record<string, McpServerEntry> | null> {
+  try {
+    const raw = await readFile(configPath, "utf-8");
+    const config = JSON.parse(raw) as { mcpServers?: Record<string, McpServerEntry> };
+    if (!config.mcpServers || typeof config.mcpServers !== "object") return null;
+    if (Object.keys(config.mcpServers).length === 0) return null;
+    return config.mcpServers;
+  } catch {
+    return null;
+  }
 }
 
 export async function runInit(): Promise<void> {
@@ -182,6 +262,41 @@ export async function runInit(): Promise<void> {
       description: "Execute allowed shell commands",
       config: { allowlist, allowSudo },
     });
+  }
+
+  // 3b. MCP auto-import from Claude Desktop
+  const configFilePath = await detectClaudeDesktopConfig();
+  if (configFilePath) {
+    const mcpServers = await scanMcpServers(configFilePath);
+    if (mcpServers) {
+      const serverNames = Object.keys(mcpServers);
+      console.log(`\n  Found ${serverNames.length} MCP server(s) in Claude Desktop config.`);
+
+      const selectedMcp = await checkbox({
+        message: "Import MCP servers:",
+        choices: serverNames.map((name) => ({
+          name: `${name} (${mcpServers[name].command}${mcpServers[name].args ? " " + mcpServers[name].args!.join(" ") : ""})`,
+          value: name,
+          checked: true,
+        })),
+      });
+
+      if (selectedMcp.length > 0) {
+        for (const name of selectedMcp) {
+          const entry = mcpServers[name];
+          const tool: ToolConfig = {
+            type: "mcp",
+            name,
+            command: entry.command,
+            ...(entry.args && { args: entry.args }),
+            description: `MCP server: ${name}`,
+            ...(entry.env && { env: entry.env }),
+          };
+          tools.push(tool);
+        }
+        console.log(`  Imported ${selectedMcp.length} MCP server${selectedMcp.length === 1 ? "" : "s"}: ${selectedMcp.join(", ")}`);
+      }
+    }
   }
 
   // 4. Determine server name

@@ -1,6 +1,7 @@
 import { readFile, writeFile, mkdir } from "node:fs/promises";
 import { dirname } from "node:path";
 import type { ClientConfig, ServerEntry } from "./config.js";
+import type { ToolDetail, McpToolInfo } from "@gigai/shared";
 
 const SKILL_MD = `---
 name: gigai
@@ -126,10 +127,117 @@ interface SkillConfig {
   servers: Record<string, { server: string; token: string }>;
 }
 
+export function generateToolMarkdown(tool: ToolDetail): string {
+  const lines: string[] = [];
+
+  // YAML frontmatter
+  lines.push("---");
+  lines.push(`name: ${tool.name}`);
+  lines.push(`description: ${tool.description}`);
+  lines.push("---");
+  lines.push("");
+
+  // Header
+  lines.push(`# ${tool.name}`);
+  lines.push("");
+  lines.push(`**Type:** ${tool.type}`);
+  lines.push("");
+  lines.push(tool.description);
+  lines.push("");
+
+  // Usage section
+  lines.push("## Usage");
+  lines.push("");
+
+  if (tool.type === "builtin") {
+    // Builtin tools have specific usage patterns
+    switch (tool.name) {
+      case "read":
+        lines.push("```bash");
+        lines.push("kon read <file> [offset] [limit]");
+        lines.push("```");
+        break;
+      case "write":
+        lines.push("```bash");
+        lines.push("kon write <file> <content>");
+        lines.push("```");
+        break;
+      case "edit":
+        lines.push("```bash");
+        lines.push("kon edit <file> <old_string> <new_string> [--all]");
+        lines.push("```");
+        break;
+      case "glob":
+        lines.push("```bash");
+        lines.push('kon glob <pattern> [path]');
+        lines.push("```");
+        break;
+      case "grep":
+        lines.push("```bash");
+        lines.push("kon grep <pattern> [path] [--glob <filter>] [-i] [-n] [-C <num>]");
+        lines.push("```");
+        break;
+      case "bash":
+        lines.push("```bash");
+        lines.push("kon bash <command> [args...]");
+        lines.push("```");
+        break;
+      default:
+        lines.push("```bash");
+        lines.push(`kon ${tool.name} [args...]`);
+        lines.push("```");
+    }
+  } else if (tool.type === "mcp") {
+    lines.push("```bash");
+    lines.push(`kon ${tool.name} <mcp-tool-name> [json-args]`);
+    lines.push("```");
+  } else {
+    // CLI and script tools
+    lines.push("```bash");
+    lines.push(`kon ${tool.name} [args...]`);
+    lines.push("```");
+  }
+
+  lines.push("");
+
+  // Arguments section (if present)
+  if (tool.args && tool.args.length > 0) {
+    lines.push("## Arguments");
+    lines.push("");
+    for (const arg of tool.args) {
+      const req = arg.required ? " *(required)*" : "";
+      const def = arg.default ? ` (default: \`${arg.default}\`)` : "";
+      lines.push(`- \`${arg.name}\`${req}: ${arg.description}${def}`);
+    }
+    lines.push("");
+  }
+
+  // MCP tools section
+  if (tool.type === "mcp" && tool.mcpTools && tool.mcpTools.length > 0) {
+    lines.push("## Available MCP Tools");
+    lines.push("");
+    for (const mcpTool of tool.mcpTools) {
+      lines.push(`### ${mcpTool.name}`);
+      lines.push("");
+      lines.push(mcpTool.description);
+      lines.push("");
+      lines.push("**Input Schema:**");
+      lines.push("");
+      lines.push("```json");
+      lines.push(JSON.stringify(mcpTool.inputSchema, null, 2));
+      lines.push("```");
+      lines.push("");
+    }
+  }
+
+  return lines.join("\n");
+}
+
 export async function generateSkillZip(
   serverName: string,
   serverUrl: string,
   token: string,
+  tools?: ToolDetail[],
 ): Promise<Buffer> {
   // Build the skill config, merging with existing if available
   let skillConfig: SkillConfig = { servers: {} };
@@ -163,10 +271,23 @@ export async function generateSkillZip(
 
   const configJson = JSON.stringify(skillConfig, null, 2) + "\n";
 
-  return createZip([
+  const entries: ZipEntry[] = [
     { path: "gigai/SKILL.md", data: Buffer.from(SKILL_MD, "utf8") },
     { path: "gigai/config.json", data: Buffer.from(configJson, "utf8") },
-  ]);
+  ];
+
+  // Generate per-tool markdown files
+  if (tools && tools.length > 0) {
+    for (const tool of tools) {
+      const md = generateToolMarkdown(tool);
+      entries.push({
+        path: `gigai/tools/${tool.name}.md`,
+        data: Buffer.from(md, "utf8"),
+      });
+    }
+  }
+
+  return createZip(entries);
 }
 
 export async function writeSkillZip(zip: Buffer): Promise<string> {

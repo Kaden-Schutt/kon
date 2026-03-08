@@ -7,11 +7,13 @@ import { fetchTools, fetchToolDetail } from "../../cli/src/discover.js";
 import { execTool, execMcpTool } from "../../cli/src/exec.js";
 import { upload, download } from "../../cli/src/transfer.js";
 import { formatToolList, formatToolDetail, formatStatus } from "../../cli/src/output.js";
+import { generateSkillZip, writeSkillZip } from "../../cli/src/skill.js";
 import { VERSION } from "../../cli/src/version.js";
+import type { ToolDetail } from "@gigai/shared";
 
 const KNOWN_COMMANDS = new Set([
   "pair", "connect", "list", "help", "status",
-  "upload", "download", "version", "--help", "-h",
+  "upload", "download", "version", "skill", "--help", "-h",
 ]);
 
 // Intercept unknown commands as dynamic tool execution
@@ -133,6 +135,40 @@ function runCitty() {
     },
   });
 
+  const skillCommand = defineCommand({
+    meta: { name: "skill", description: "Regenerate the skill zip with current tool details" },
+    async run() {
+      const { serverUrl, sessionToken } = await connect();
+      const http = createHttpClient(serverUrl, sessionToken);
+
+      // Fetch all tools and their details
+      const tools = await fetchTools(http);
+      console.log(`Fetching details for ${tools.length} tool(s)...`);
+
+      const toolDetails: ToolDetail[] = await Promise.all(
+        tools.map(async (t) => {
+          const { tool } = await fetchToolDetail(http, t.name);
+          return tool;
+        }),
+      );
+
+      // Read current config to get server info
+      const config = await readConfig();
+      const activeServer = config.activeServer;
+      if (!activeServer || !config.servers[activeServer]) {
+        throw new Error("No active server. Run 'kon connect' first.");
+      }
+      const entry = config.servers[activeServer];
+
+      const zip = await generateSkillZip(activeServer, entry.server, entry.token, toolDetails);
+      const outPath = await writeSkillZip(zip);
+
+      console.log(`\nSkill zip written to: ${outPath}`);
+      console.log(`Included ${toolDetails.length} tool documentation file(s).`);
+      console.log("Upload this file as a skill in Claude (Settings → Customize → Upload Skill).");
+    },
+  });
+
   const main = defineCommand({
     meta: {
       name: "kon",
@@ -148,6 +184,7 @@ function runCitty() {
       upload: uploadCommand,
       download: downloadCommand,
       version: versionCommand,
+      skill: skillCommand,
     },
   });
 
