@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/kon-logo.png" alt="Kon" width="140" />
+  <img src="assets/kon-logo.png" alt="Kon" width="200" />
 </p>
 
 <h1 align="center">Kon</h1>
