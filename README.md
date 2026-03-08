@@ -21,6 +21,26 @@ Install the server, paste one command into Claude, and anything you've allowed i
 
 No Claude Code subscription. No terminal running on your machine. No developer setup. Just Claude, talking to your computer, doing what you told it it could do.
 
+## Prerequisites
+
+Before you start, you need two things:
+
+**1. Tailscale**
+
+Kon requires an HTTPS connection between Claude's sandbox and your machine. [Tailscale](https://tailscale.com/) with Funnel enabled is the recommended (and easiest) way to get this. Install Tailscale, create an account, and enable Funnel on your machine. The setup wizard handles the rest.
+
+**2. Claude capabilities**
+
+In your Claude settings (claude.ai > Settings > Capabilities), make sure:
+
+- **Cloud code execution and file creation** is enabled
+- **Allow network egress** is enabled
+- **Domain allowlist** is set to **All domains** (or at minimum, your specific `*.ts.net` Tailscale domain)
+
+<p align="center">
+  <img src="assets/claude-capabilities.png" alt="Claude capabilities settings" width="600" />
+</p>
+
 ## Quickstart
 
 ### 1. Install the gigai server on your machine
@@ -39,16 +59,16 @@ Walks you through HTTPS setup (Tailscale Funnel recommended), port config, selec
 
 ### 3. Paste into Claude
 
-The generated instructions tell Claude to install Kon and pair with your server:
+The setup wizard generates a prompt specifically for your server — paste it into Claude. It will look something like this:
 
 ```bash
 npm install -g @schuttdev/kon
-kon pair <code> <server-url>
+kon pair ABC123XY https://your-machine.tail1234.ts.net:7443
 ```
 
-This creates a skill file. Download it and upload to Claude as a skill (Settings > Customize > Upload Skill).
+> **Don't paste the example above** — it won't work. Use the actual prompt from your setup wizard, which contains your real pairing code and server URL.
 
-**Note:** Claude's code execution sandbox needs network access to reach your server. In your Claude project settings, either enable access to all domains or add your specific server domain (e.g., your `*.ts.net` Tailscale domain).
+Claude will run the commands, generate a skill file, and prompt you to download it. Upload it to Claude as a skill (Settings > Customize > Upload Skill).
 
 ### 4. Use it
 
@@ -249,12 +269,6 @@ docker compose up -d
 ```
 
 Mount your config at `/data/gigai.config.json`.
-
-## Requirements
-
-- Node.js 20+
-- For HTTPS: [Tailscale](https://tailscale.com/) (recommended) or [Cloudflare Tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/)
-- `gigai install` uses macOS launchd — other platforms need to manage the background process manually
 
 ## License
 
