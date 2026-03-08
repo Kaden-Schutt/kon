@@ -31,11 +31,7 @@ Kon requires an HTTPS connection between Claude's sandbox and your machine. [Tai
 
 **2. Claude capabilities**
 
-In your Claude settings (claude.ai > Settings > Capabilities), make sure:
-
-- **Cloud code execution and file creation** is enabled
-- **Allow network egress** is enabled
-- **Domain allowlist** is set to **All domains** (or at minimum, your specific `*.ts.net` Tailscale domain)
+On claude.ai, go to **Settings > Capabilities** and configure the **Code execution and file creation** section:
 
 <p align="center">
   <img src="assets/claude-capabilities.png" alt="Claude capabilities settings" width="600" />
