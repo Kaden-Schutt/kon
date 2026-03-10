@@ -10,7 +10,15 @@ case "$ARCH" in
 esac
 BIN="kond-${OS}-${ARCH}"
 URL="https://github.com/$REPO/releases/latest/download/$BIN"
-DEST="/usr/local/bin/kond"
-curl -fsSL "$URL" -o "$DEST"
-chmod +x "$DEST"
-echo "kond installed to $DEST"
+TMP=$(mktemp)
+echo "Downloading kond for ${OS}-${ARCH}..."
+curl -fsSL "$URL" -o "$TMP"
+chmod +x "$TMP"
+if [ -w /usr/local/bin ]; then
+  mv "$TMP" /usr/local/bin/kond
+else
+  echo "Installing to /usr/local/bin (requires sudo)..."
+  sudo mv "$TMP" /usr/local/bin/kond
+fi
+echo "kond installed to /usr/local/bin/kond"
+kond --version
