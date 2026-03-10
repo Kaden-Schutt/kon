@@ -25,8 +25,12 @@ do
   echo "  updated $f"
 done
 
+# Update VERSION constants
 printf 'export const VERSION = "%s";\n' "$V" > packages/cli/src/version.ts
 echo "  updated packages/cli/src/version.ts"
+
+sed -i '' "s/const VERSION = \"[^\"]*\"/const VERSION = \"$V\"/" packages/server/src/routes/health.ts
+echo "  updated packages/server/src/routes/health.ts"
 
 # --- Commit, tag, push ---
 
@@ -37,6 +41,7 @@ git add \
   packages/cli/package.json \
   packages/kon/package.json \
   packages/cli/src/version.ts \
+  packages/server/src/routes/health.ts \
   .claude-plugin/plugin.json
 
 git commit -m "chore: bump version to $V"

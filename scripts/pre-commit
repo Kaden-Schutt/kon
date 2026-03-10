@@ -26,10 +26,16 @@ check_version "$ROOT/packages/cli/package.json"
 check_version "$ROOT/packages/kon/package.json"
 check_version "$ROOT/.claude-plugin/plugin.json"
 
-# Check version.ts
+# Check VERSION constants
 TS_VERSION=$(grep -o '"[0-9][0-9.]*"' "$ROOT/packages/cli/src/version.ts" | tr -d '"')
 if [ "$TS_VERSION" != "$ROOT_VERSION" ]; then
   echo "VERSION MISMATCH: packages/cli/src/version.ts has $TS_VERSION, expected $ROOT_VERSION"
+  ERRORS=$((ERRORS + 1))
+fi
+
+HEALTH_VERSION=$(grep -o '"[0-9][0-9.]*"' "$ROOT/packages/server/src/routes/health.ts" | head -1 | tr -d '"')
+if [ "$HEALTH_VERSION" != "$ROOT_VERSION" ]; then
+  echo "VERSION MISMATCH: packages/server/src/routes/health.ts has $HEALTH_VERSION, expected $ROOT_VERSION"
   ERRORS=$((ERRORS + 1))
 fi
 
