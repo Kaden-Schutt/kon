@@ -11,6 +11,14 @@ V="$1"
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
+# --- Check for uncommitted changes ---
+if [ -n "$(git diff --name-only)" ] || [ -n "$(git diff --cached --name-only)" ]; then
+  echo "ERROR: You have uncommitted changes. Commit or stash them first."
+  git diff --name-only
+  git diff --cached --name-only
+  exit 1
+fi
+
 # --- Update versions ---
 
 for f in \
