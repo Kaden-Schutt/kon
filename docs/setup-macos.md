@@ -2,16 +2,17 @@
 
 ## 1. Install kond
 
-Requires Node.js 20+ and [Homebrew](https://brew.sh/).
+Requires [Homebrew](https://brew.sh/).
+
+```bash
+brew tap schuttdev/tap
+brew install kond
+```
+
+Or with npm (requires Node.js 20+):
 
 ```bash
 npm install -g @schuttdev/kond
-```
-
-If you need Node:
-
-```bash
-brew install node@20
 ```
 
 ## 2. Run the setup wizard

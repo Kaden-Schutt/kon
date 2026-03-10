@@ -83,6 +83,14 @@ Claude capabilities configured for code execution — go to **Settings > Capabil
 ### 1. Install and run the setup wizard
 
 ```bash
+brew tap schuttdev/tap
+brew install kond
+kond init
+```
+
+Or with npm:
+
+```bash
 npm install -g @schuttdev/kond
 kond init
 ```
