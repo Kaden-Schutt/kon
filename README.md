@@ -5,38 +5,70 @@
 <h1 align="center">Kon</h1>
 
 <p align="center">
-  Claude on your phone can now reach your computer.
+  Give Claude your tools — from anywhere.
 </p>
 
 <p align="center">
-  <a href="https://www.npmjs.com/package/@schuttdev/kon"><img src="https://img.shields.io/npm/v/@schuttdev/kon?label=kon&color=orange" alt="kon npm" /></a>
   <a href="https://www.npmjs.com/package/@schuttdev/kond"><img src="https://img.shields.io/npm/v/@schuttdev/kond?label=kond&color=brown" alt="kond npm" /></a>
+  <a href="https://www.npmjs.com/package/@schuttdev/kon"><img src="https://img.shields.io/npm/v/@schuttdev/kon?label=kon&color=orange" alt="kon npm" /></a>
 </p>
 
 ---
 
-Kon is a lightweight client that runs inside Claude's code execution sandbox. It connects over HTTPS to **kond**, a server daemon running on your machine that exposes tools — shell commands, filesystem access, MCP servers, scripts — through an authenticated API.
+Kon runs on your machine and lets Claude access your shell, MCP servers, and scripts over HTTPS. Works from your phone, the web, any Claude session.
 
 <p align="center">
-  <img src="assets/kon-demo.png" alt="Kon pairing demo" width="680" />
+  <img src="assets/kon-demo.png" alt="Kon demo" width="680" />
 </p>
 
-Install the server, paste one command into Claude, and anything you've allowed is now accessible from Claude on iOS, the web, or anywhere else you use claude.ai.
+## Prerequisites
 
-## Quickstart with Claude Code
+Enable code execution in Claude: go to **Settings > Capabilities** on claude.ai:
 
-If you have [Claude Code](https://docs.anthropic.com/en/docs/claude-code), it can handle the entire setup for you:
+<p align="left">
+  <img src="assets/claude-capabilities.png" alt="Claude capabilities settings" width="800" />
+</p>
+
+## Install
+
+```bash
+curl -fsSL kond.schutt.dev | sh
+kond init
+```
+
+The wizard installs Tailscale if needed, configures HTTPS, and generates a pairing prompt to paste into Claude. That's it.
+
+<details>
+<summary>Other install methods</summary>
+
+```bash
+brew install schuttdev/tap/kond    # Homebrew (macOS)
+npm install -g @schuttdev/kond     # npm (any platform, Node 20+)
+```
+
+</details>
+
+<details>
+<summary>Claude Code users</summary>
 
 ```
 /plugin install https://github.com/Kaden-Schutt/kon
 /kon:kond-setup
 ```
 
-Claude Code will walk you through everything below (and help you manage your server after). With [Claude Code remote control](https://docs.anthropic.com/en/docs/claude-code/remote-control), you can also add tools, change configs, and troubleshoot from your phone.
+Claude Code walks you through setup and helps manage your server after. With [remote control](https://docs.anthropic.com/en/docs/claude-code/remote-control), you can add tools and troubleshoot from your phone.
 
-## What you can do with it
+</details>
 
-**Give Claude a browser.** Wrap [agent-browser](https://github.com/vercel-labs/agent-browser) as a CLI tool and Claude can navigate the web from your machine:
+## What you can do
+
+**Connect your Obsidian vault** — Claude can search and read your notes from anywhere:
+
+```bash
+kond mcp add obsidian -- npx @mauricio.wolff/mcp-obsidian@latest ~/Documents/MyVault
+```
+
+**Give Claude a browser** — wrap any CLI tool and it's accessible from your phone:
 
 ```bash
 kond wrap cli
@@ -44,107 +76,47 @@ kond wrap cli
 # command: npx agent-browser
 ```
 
-**Connect your Obsidian vault.** Wrap an Obsidian MCP server and Claude can search and read your notes from anywhere:
+**Proxy any MCP server** — your existing servers now work from anywhere, not just Claude Desktop:
 
 ```bash
-kond mcp add obsidian -- npx @mauricio.wolff/mcp-obsidian@latest ~/Documents/MyVault
+kond mcp add github -- npx -y @modelcontextprotocol/server-github
 ```
 
-**Wrap any CLI tool** — docker, kubectl, ffmpeg, whatever. It's now accessible from Claude on your phone.
-
-**Wrap any MCP server** — kond proxies tool calls over REST. Your existing MCP servers now work from anywhere, not just Claude Desktop.
-
-**Import from Claude Desktop** — the setup wizard auto-detects your `claude_desktop_config.json` and offers to import everything.
-
-**Schedule tasks** — `kond cron add --at "9:00 AM tomorrow" bash git pull`
-
-## Secure by default
-
-You decide exactly what Claude can touch. Nothing is open unless you open it.
-
-- **Shell**: locked to an allowlist you define. Everything else is blocked.
-- **Filesystem**: scoped to directories you specify. No wandering.
-- **HTTPS only**: all traffic encrypted via Tailscale Funnel or Cloudflare Tunnel.
-- **AES-256-GCM tokens**: tied to your Anthropic org UUID.
-- **No shell injection**: all execution uses `spawn()` with `shell: false`.
-
-## Quickstart
-
-**Prerequisites:**
-[Homebrew](https://brew.sh/) (macOS) and [Node.js 20+](https://nodejs.org/). The setup wizard installs Tailscale for you if needed.
-> Platform guides: [macOS](docs/setup-macos.md) | [Linux](docs/setup-linux.md) | [WSL](docs/setup-wsl.md) | [Docker](docs/setup-docker.md)
-
-Claude capabilities configured for code execution — go to **Settings > Capabilities** on claude.ai:
-
-<p align="left">
-  <img src="assets/claude-capabilities.png" alt="Claude capabilities settings" width="800" />
-</p>
-
-### 1. Install and run the setup wizard
+**Schedule tasks** — run commands on a timer or at a specific time:
 
 ```bash
-curl -fsSL kond.schutt.dev | sh
-kond init
+kond cron add --at "9:00 AM tomorrow" bash git pull
 ```
 
-Or via Homebrew / npm:
+The setup wizard can also auto-import MCP servers from your Claude Desktop config.
 
-```bash
-brew install schuttdev/tap/kond    # macOS
-npm install -g @schuttdev/kond     # any platform with Node 20+
-```
+## Security
 
-### 2. Paste into Claude
+Nothing is open unless you open it. Shell commands are locked to an allowlist. Filesystem access is scoped to directories you specify. All traffic is encrypted over HTTPS via Tailscale Funnel. Tokens use AES-256-GCM tied to your Anthropic org. All execution uses `spawn()` with `shell: false` — no injection.
 
-The wizard generates a prompt for your server — paste it into Claude. It will look something like:
+## How it compares
 
-> Install kon and pair with my server:
-> ```bash
-> npm install -g @schuttdev/kon
-> kon pair ABC123XY https://your-machine.tail1234.ts.net
-> ```
-> Then show me the skill file output so I can save it.
-
-**Don't paste the example above** — use the actual prompt from your wizard, which contains your real pairing code and server URL.
-
-### 3. Use it
-
-> "List my home directory"
-> "Run the tests in my project"
-> "Search for TODO comments in ~/projects/myapp"
+Kon works with regular claude.ai — the chat interface everyone already uses. No Pro subscription, no terminal, no developer background needed. Claude Code users get a [plugin](#install) to manage their kond server. Other remote tool projects tend to give Claude broad access by default; Kon gives it nothing unless you opt in.
 
 ## Commands
 
 ```bash
-# Server management
 kond start                   # start the server
 kond stop                    # stop the server
 kond status                  # check if running
 kond pair                    # generate a new pairing code
-kond install                 # install as background service (macOS launchd / Linux systemd)
+kond install                 # run as background service (launchd / systemd)
 kond mcp add <n> -- <cmd>    # add an MCP server
 kond wrap cli|mcp|script     # add a tool interactively
 kond unwrap <name>           # remove a tool
 kond cron add ...            # schedule a task
-
-# Client (runs in Claude's sandbox)
-kon <tool-name> [args...]    # execute any tool
-kon list                     # list available tools
-kon status                   # connection info
-kon connect <server-name>    # switch between servers
 ```
 
-## Different approaches
+## Docs
 
-**Claude Code** gives you full tool access from a terminal with a Pro/Max subscription. Kon takes a different approach — it works with regular claude.ai, the chat interface anyone already uses. No subscription beyond the base plan, no terminal, no developer background needed. They complement each other well: Claude Code users can use the [Kon plugin](#quickstart-with-claude-code) to manage their kond server.
-
-**Other remote tool projects** tend toward giving Claude broad access by default. Kon goes the other way: nothing is accessible unless you explicitly opt in. Different philosophies for different use cases.
-
-## More
-
-- [Tool configuration reference](docs/configuration.md)
-- [Architecture and internals](docs/architecture.md)
-- [Tailscale setup guides](docs/setup-macos.md)
+- [Configuration reference](docs/configuration.md)
+- [Architecture](docs/architecture.md)
+- Setup: [macOS](docs/setup-macos.md) | [Linux](docs/setup-linux.md) | [WSL](docs/setup-wsl.md) | [Docker](docs/setup-docker.md)
 
 ## License
 

@@ -28,28 +28,14 @@ If the user just ran `kond init` and needs help finishing setup:
 
 ### Adding tools
 
-**MCP servers** (most common):
-```bash
-kond mcp add <name> -- <command> [args...]
-# Examples:
-kond mcp add browser -- npx -y @anthropic-ai/mcp-server-puppeteer
-kond mcp add github -- npx -y @modelcontextprotocol/server-github --env GITHUB_TOKEN=ghp_xxx
-kond mcp add filesystem -- npx -y @modelcontextprotocol/server-filesystem /home/user/projects
-```
+For adding tools, MCP servers, or integrations, use the `/kon:add-tool` skill — it has detailed instructions and knows about popular integrations (agent-browser, Obsidian, GitHub, Docker, etc.).
 
-**CLI tools**:
+Quick reference:
 ```bash
-kond wrap cli    # interactive — prompts for name, command, description
+kond mcp add <name> -- <command> [args...]   # MCP servers
+kond wrap cli                                 # CLI tools (interactive)
+kond wrap script                              # Scripts (interactive)
 ```
-
-**Scripts**:
-```bash
-kond wrap script  # interactive — prompts for name, path, description
-```
-
-**Import from Claude Desktop**: The init wizard can auto-detect MCP servers from Claude Desktop's config. If the user skipped this:
-- macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
-- Read the file, find `mcpServers`, and add each one with `kond mcp add`
 
 ### Cron / scheduled tasks
 

@@ -1,0 +1,51 @@
+#!/bin/sh
+#
+# Pre-commit sanity checks for the Kon monorepo.
+# Install: git config core.hooksPath scripts
+#
+
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+ERRORS=0
+
+# --- Version consistency ---
+# All these files must have the same version string.
+ROOT_VERSION=$(grep -o '"version": "[^"]*"' "$ROOT/package.json" | head -1 | grep -o '[0-9][0-9.]*')
+
+check_version() {
+  FILE="$1"
+  V=$(grep -o '"version": "[^"]*"' "$FILE" | head -1 | grep -o '[0-9][0-9.]*')
+  if [ "$V" != "$ROOT_VERSION" ]; then
+    echo "VERSION MISMATCH: $FILE has $V, expected $ROOT_VERSION"
+    ERRORS=$((ERRORS + 1))
+  fi
+}
+
+check_version "$ROOT/packages/shared/package.json"
+check_version "$ROOT/packages/server/package.json"
+check_version "$ROOT/packages/cli/package.json"
+check_version "$ROOT/packages/kon/package.json"
+check_version "$ROOT/.claude-plugin/plugin.json"
+
+# Check version.ts
+TS_VERSION=$(grep -o '"[0-9][0-9.]*"' "$ROOT/packages/cli/src/version.ts" | tr -d '"')
+if [ "$TS_VERSION" != "$ROOT_VERSION" ]; then
+  echo "VERSION MISMATCH: packages/cli/src/version.ts has $TS_VERSION, expected $ROOT_VERSION"
+  ERRORS=$((ERRORS + 1))
+fi
+
+# --- Build check ---
+# Only run if source files are staged (skip for docs-only commits)
+STAGED=$(git diff --cached --name-only)
+if echo "$STAGED" | grep -qE '^packages/.*\.(ts|json)$'; then
+  if ! npm run build > /dev/null 2>&1; then
+    echo "BUILD FAILED: npm run build exited with errors"
+    ERRORS=$((ERRORS + 1))
+  fi
+fi
+
+# --- Result ---
+if [ "$ERRORS" -gt 0 ]; then
+  echo ""
+  echo "$ERRORS error(s) found. Fix them or run: ./scripts/bump.sh $ROOT_VERSION"
+  exit 1
+fi
