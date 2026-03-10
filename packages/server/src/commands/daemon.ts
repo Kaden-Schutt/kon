@@ -7,15 +7,15 @@ import { promisify } from "node:util";
 const execFileAsync = promisify(execFile);
 
 function getKondBin(): string {
-  // Compiled binary: process.argv[1] is the first CLI arg, not a script path
-  // npm/node: process.argv[1] is the script path
+  // npm/node: process.argv = ["/path/to/node", "/path/to/script.js", ...]
+  // Compiled bun: process.argv = ["/usr/local/bin/kond", "install", ...]
+  //   but process.execPath = "/$bunfs/root/kond-darwin-arm64" (virtual, unusable)
   const arg1 = process.argv[1];
   if (arg1 && (arg1.endsWith(".js") || arg1.endsWith(".mjs"))) {
-    // Running via node — need node + script
     return `${process.execPath} ${arg1}`;
   }
-  // Compiled binary — just use the executable path
-  return process.execPath;
+  // Compiled binary — use argv[0] which is the real filesystem path
+  return process.argv[0] ?? "kond";
 }
 
 function getLaunchdPlist(configPath: string): string {
