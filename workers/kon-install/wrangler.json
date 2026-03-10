@@ -1,0 +1,11 @@
+{
+  "name": "kon-install",
+  "main": "index.js",
+  "compatibility_date": "2025-01-01",
+  "routes": [
+    {
+      "pattern": "kon.schutt.dev",
+      "custom_domain": true
+    }
+  ]
+}
