@@ -1,7 +1,7 @@
 import type { FastifyInstance } from "fastify";
 import { platform, hostname, userInfo } from "node:os";
 
-const VERSION = "0.5.5";
+const VERSION = "0.5.6";
 const startTime = Date.now();
 
 export async function healthRoutes(server: FastifyInstance) {
